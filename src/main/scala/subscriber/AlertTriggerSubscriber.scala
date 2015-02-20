@@ -6,6 +6,7 @@ import com.thenewmotion.akka.rabbitmq._
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration.{Duration, MILLISECONDS}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object AlertTriggerSubscriber {
   val system = ActorSystem("system")
@@ -49,9 +50,14 @@ object AlertTriggerSubscriber {
 
       // Queue consume options
       val autoAck = false
+      val multipleAck = false
+      val requeue = true
       val consumer = new DefaultConsumer(channel) {
         override def handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, body: Array[Byte]) {
-          println("received: " + new String(body, "UTF-8"))
+          AlertTriggerProcessor.processAlertTrigger(new String(body, "UTF-8")).onSuccess({
+            case true => channel.basicAck(envelope.getDeliveryTag, multipleAck)
+            case false => channel.basicNack(envelope.getDeliveryTag, multipleAck, requeue)
+          })
         }
       }
       channel.basicConsume(queue, autoAck, consumer)
