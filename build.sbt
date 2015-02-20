@@ -1,3 +1,5 @@
+packageArchetype.java_application
+
 name := """alerting-action-worker"""
 
 version := "1.0"
