@@ -8,7 +8,7 @@ case class AlertModel(
                        alert_id: UUID,
                        name: String,
                        activated: Boolean,
-                       measurement_id: UUID
+                       measurement_id: String
                        ) {
 }
 

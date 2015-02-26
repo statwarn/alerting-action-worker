@@ -5,7 +5,7 @@ import java.util.UUID
 import play.api.libs.json.{JsObject, Json, Format}
 
 case class MeasurementModel(
-                             id: UUID,
+                             id: String,
                              data: JsObject,
                              metadata: JsObject
                              ) {
