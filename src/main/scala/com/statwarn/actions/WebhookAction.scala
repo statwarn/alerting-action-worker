@@ -1,3 +1,4 @@
+package com.statwarn
 package actions
 
 import models.{MeasurementModel, ActionModel, AlertModel}

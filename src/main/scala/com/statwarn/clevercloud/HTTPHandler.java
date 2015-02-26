@@ -1,4 +1,4 @@
-package clevercloud;
+package com.statwarn.clevercloud;
 
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;

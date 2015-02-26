@@ -1,3 +1,4 @@
+package com.statwarn
 package models
 
 object ActionType extends Enumeration {

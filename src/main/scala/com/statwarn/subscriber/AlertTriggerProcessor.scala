@@ -1,3 +1,4 @@
+package com.statwarn
 package subscriber
 
 import actions.WebhookAction

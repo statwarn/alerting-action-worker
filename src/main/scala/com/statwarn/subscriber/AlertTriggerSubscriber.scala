@@ -1,3 +1,4 @@
+package com.statwarn
 package subscriber
 
 import akka.actor.FSM.{SubscribeTransitionCallBack, Transition}

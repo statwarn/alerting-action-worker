@@ -1,3 +1,5 @@
+package com.statwarn
+
 import clevercloud.HTTPThread
 import subscriber.AlertTriggerSubscriber
 
