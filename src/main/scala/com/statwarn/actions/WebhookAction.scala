@@ -1,15 +1,18 @@
 package com.statwarn
 package actions
 
-import models.{MeasurementModel, ActionModel, AlertModel}
+import akka.actor.ActorSystem
+import com.statwarn.models.{ActionModel, AlertModel, MeasurementModel}
 import play.api.libs.json.Json
+import spray.client.pipelining.{Post, sendReceive}
+import spray.http.{HttpRequest, HttpResponse}
+import spray.httpx.PlayJsonSupport.playJsonMarshaller
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object WebhookAction extends Action {
-  val builder = new com.ning.http.client.AsyncHttpClientConfig.Builder()
-  val client = new play.api.libs.ws.ning.NingWSClient(builder.build())
+  implicit val system = ActorSystem("system")
+  import com.statwarn.actions.WebhookAction.system.dispatcher
 
   /**
    * Send the webhook according to its configuration
@@ -19,15 +22,18 @@ object WebhookAction extends Action {
    * @return
    */
   override def send(measurement: MeasurementModel, triggeredAction: ActionModel, alert: AlertModel): Future[Boolean] = {
-    val webhookURL = (triggeredAction.action_configuration \ "url").asOpt[String]
+    val pipeline: HttpRequest => Future[HttpResponse] = sendReceive
 
-    webhookURL match {
+    (triggeredAction.action_configuration \ "url").asOpt[String] match {
       case Some(url) =>
-        client.url(url).post(Json.obj(
-          "alert" -> alert.name
-        )).map(_ => true).fallbackTo(Future.successful(false))
-      case None =>
-        Future.successful(false)
+        val json = Json.obj(
+          "measurement" -> measurement,
+          "triggeredAction" -> triggeredAction,
+          "alert" -> alert
+        )
+        pipeline(Post(url, json)).map(_ => true).fallbackTo(Future.successful(false))
+
+      case _ => Future.successful(false)
     }
   }
 }
