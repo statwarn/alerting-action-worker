@@ -1,8 +1,6 @@
 package com.statwarn
 package models
 
-import java.util.UUID
-
 import play.api.libs.json.{JsObject, Json, Format}
 
 case class MeasurementModel(
