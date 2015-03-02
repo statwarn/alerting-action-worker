@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-testkit" % "2.3.9" % "test",
   "org.scalatest" %% "scalatest" % "2.2.4" % "test",
   "com.typesafe" % "config" % "1.2.1",
-  "com.typesafe.play" %% "play-json" % "2.4.0-M2" excludeAll ExclusionRule(organization = "org.specs2")
+  "com.typesafe.play" %% "play-json" % "2.4.0-M2"
 )
 
 // Akka-RabbitMQ - https://github.com/thenewmotion/akka-rabbitmq
@@ -23,6 +23,3 @@ libraryDependencies += "com.thenewmotion.akka" %% "akka-rabbitmq" % "1.2.4"
 resolvers += "spray repo" at "http://repo.spray.io"
 
 libraryDependencies += "io.spray" %% "spray-client" % "1.3.2"
-
-// Netty (for CleverCloud's listener)
-libraryDependencies += "org.jboss.netty" % "netty" % "3.2.10.Final"
