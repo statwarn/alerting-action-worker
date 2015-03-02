@@ -9,7 +9,7 @@ import scala.concurrent.duration.{Duration, MILLISECONDS}
 
 object AlertTriggerSubscriber {
   val system = ActorSystem("system")
-  val configuration = ApplicationMain.configuration
+  val configuration = ApplicationRunner.configuration
   val connectionActor = getConnectionActor
 
   /**
@@ -43,7 +43,7 @@ object AlertTriggerSubscriber {
     factory
   }
 
-  private def setupChannel(channel: Channel, actor: ActorRef): Unit ={
+  private def setupChannel(channel: Channel, actor: ActorRef): Unit = {
     val queueName = configuration.getString("alert_subscriber.queue_name")
     val (durable, exclusive, autoDelete, arguments) = (true, false, false, null)
     val queue = channel.queueDeclare(queueName, durable, exclusive, autoDelete, arguments).getQueue
