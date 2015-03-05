@@ -32,8 +32,9 @@ object WebhookAction extends Action {
           "triggeredAction" -> triggeredAction,
           "alert" -> alert
         )
+        val finalUrl = substituteVariablesInURL(url, alert)
         val httpEntity = HttpEntity(`application/json`, json.toString())
-        val httpRequest = HttpRequest(method = httpMethod, uri = url, entity = httpEntity)
+        val httpRequest = HttpRequest(method = httpMethod, uri = finalUrl, entity = httpEntity)
 
         println(s"Sending webhook: ${httpRequest.method} ${httpRequest.uri} ${httpRequest.entity.asString}")
         pipeline(httpRequest).map(_ => true).fallbackTo(Future.successful(false))
@@ -51,5 +52,21 @@ object WebhookAction extends Action {
       case "PUT" => HttpMethods.PUT
       case "DELETE" => HttpMethods.DELETE
     }
+  }
+
+  /**
+   * Substitute variables (enclosed in double brackets) in URL.
+   * Supported variables:
+   * - alert_id
+   * @param url
+   * @param alert
+   * @return
+   */
+  private def substituteVariablesInURL(url: String, alert: AlertModel): String = {
+    substituteAlertIdInURL(url, alert)
+  }
+
+  private def substituteAlertIdInURL(url: String, alert: AlertModel): String = {
+    url.replaceAll("""\{\{alert_id\}\}""", alert.alert_id.toString)
   }
 }
