@@ -3,10 +3,10 @@ package actions
 
 import akka.actor.ActorSystem
 import com.statwarn.models.{ActionModel, AlertModel, MeasurementModel}
-import play.api.libs.json.Json
-import spray.client.pipelining.{Post, sendReceive}
-import spray.http.{HttpRequest, HttpResponse}
-import spray.httpx.PlayJsonSupport.playJsonMarshaller
+import play.api.libs.json.{JsObject, Json}
+import spray.client.pipelining.sendReceive
+import spray.http.ContentTypes._
+import spray.http._
 
 import scala.concurrent.Future
 
@@ -23,6 +23,7 @@ object WebhookAction extends Action {
    */
   override def send(measurement: MeasurementModel, triggeredAction: ActionModel, alert: AlertModel): Future[Boolean] = {
     val pipeline: HttpRequest => Future[HttpResponse] = sendReceive
+    val httpMethod: HttpMethod = extractHttpMethodFromConfiguration(triggeredAction.action_configuration)
 
     (triggeredAction.action_configuration \ "url").asOpt[String] match {
       case Some(url) =>
@@ -31,9 +32,24 @@ object WebhookAction extends Action {
           "triggeredAction" -> triggeredAction,
           "alert" -> alert
         )
-        pipeline(Post(url, json)).map(_ => true).fallbackTo(Future.successful(false))
+        val httpEntity = HttpEntity(`application/json`, json.toString())
+        val httpRequest = HttpRequest(method = httpMethod, uri = url, entity = httpEntity)
+
+        println(s"Sending webhook: ${httpRequest.method} ${httpRequest.uri} ${httpRequest.entity.asString}")
+        pipeline(httpRequest).map(_ => true).fallbackTo(Future.successful(false))
 
       case _ => Future.successful(false)
+    }
+  }
+
+  private def extractHttpMethodFromConfiguration(configuration: JsObject): HttpMethod = {
+    // Get HTTP method specified in action configuration, default to POST if not set
+    val httpMethodString: String = (configuration \ "method").asOpt[String].getOrElse("POST")
+
+    httpMethodString.toUpperCase match {
+      case "POST" => HttpMethods.POST
+      case "PUT" => HttpMethods.PUT
+      case "DELETE" => HttpMethods.DELETE
     }
   }
 }
